@@ -27,6 +27,31 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     if rct.top < 0 or HEIGHT < rct.bottom:
         tate = False
     return yoko, tate
+def game_over(screen:pg.Surface) ->None:
+    """
+    ゲームオーバを表示させる関数
+    引数：screenはpygeme 表示のSueface
+    """
+    #画面を黒く塗る
+    black_img = pg.display.set_mode((WIDTH, HEIGHT))
+    black_img.fill((0,0,0))  
+    #泣いている工科トン
+    kk_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9)
+    kk_rct_left = kk_img.get_rect()
+    kk_rct_left.center = (WIDTH // 2)-200, HEIGHT // 2 
+    screen.blit(kk_img, kk_rct_left)
+    kk_rct_right = kk_img.get_rect()
+    kk_rct_right.center = (WIDTH // 2)+200, HEIGHT // 2 
+    screen.blit(kk_img, kk_rct_right)
+    #テキスト作成
+    fonto=pg.font.Font(None,80)
+    txt=fonto.render("Game Over",True,(255,255,255))
+    text_rect = txt.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    screen.blit(txt, text_rect)
+    pg.display.update()
+    pg.time.sleep(5)
+
+    
 
 
 def main():
@@ -49,9 +74,9 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
-        if kk_rct.colliderect(bb_rct):
-            print("ゲームオーバー")
-            return  # ゲームオーバー
+        if kk_rct.colliderect(bb_rct):#工科トンが衝突したら実行
+            game_over(screen)
+            return 
         screen.blit(bg_img, [0, 0]) 
 
         key_lst = pg.key.get_pressed()
