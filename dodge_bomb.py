@@ -57,9 +57,9 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     拡大する爆弾のSurfaceリストと加速度リストを作成する関数
     戻り値：爆弾リスト、加速度リスト
     """    
-    bb_imgs=[]
-    bb_acc=[]
-    for r in range(1,11):
+    bb_imgs=[]#爆弾リスト
+    bb_acc=[]#加速度リスト
+    for r in range(1,11):#半径10倍まで
         bb_img=pg.Surface((20 * r, 20 * r),pg.SRCALPHA)
         pg.draw.circle(bb_img, (255, 0, 0), (10 * r, 10 * r), 10 * r)
         bb_imgs.append(bb_img)
@@ -84,13 +84,14 @@ def main():
     vx, vy = +5, +5  # 爆弾速度ベクトル
     clock = pg.time.Clock()
     tmr = 0
-    bb_imgs, bb_acc=init_bb_imgs()
+    bb_imgs, bb_acc=init_bb_imgs()#初期化する
     while True:
-        index = min(tmr // 500, 9)
+        #爆弾のサイズと速度を時間経過によってかわる
+        index = min(tmr // 500, 9)#ｔｍｒが500ごとに変化する
         bb_img =bb_imgs[index]
         avx = vx * bb_acc[index]
         avy = vy * bb_acc[index]
-        bb_rct.move_ip(avx, avy)
+        bb_rct.move_ip(avx, avy)#爆弾の移動
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
