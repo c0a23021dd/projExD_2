@@ -1,17 +1,32 @@
 import os
 import random
 import sys
+
 import pygame as pg
 
 
 WIDTH, HEIGHT = 1100, 650
-DELTA={
-    pg.K_UP:(0,-5),
-    pg.K_DOWN:(0,+5),
-    pg.K_LEFT:(-5,0),
-    pg.K_RIGHT:(+5,0)
+DELTA = {
+    pg.K_UP: (0, -5),
+    pg.K_DOWN: (0, +5),
+    pg.K_LEFT: (-5, 0),
+    pg.K_RIGHT: (+5, 0),
 }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
+    """
+    引数で与えられたRectが画面の中か外かを判定する
+    引数：こうかとんRect or 爆弾Rect
+    戻り値：真理値タプル（横，縦）／画面内：True，画面外：False
+    """
+    yoko, tate = True, True
+    if rct.left < 0 or WIDTH < rct.right:
+        yoko = False
+    if rct.top < 0 or HEIGHT < rct.bottom:
+        tate = False
+    return yoko, tate
 
 
 def main():
@@ -21,14 +36,15 @@ def main():
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
+    bb_img = pg.Surface((20, 20))  # 爆弾用の空Surface
+    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)  # 爆弾円を描く
+    bb_img.set_colorkey((0, 0, 0))  # 四隅の黒を透過させる
+    bb_rct = bb_img.get_rect()  # 爆弾Rectの抽出
+    bb_rct.centerx = random.randint(0, WIDTH)
+    bb_rct.centery = random.randint(0, HEIGHT)
+    vx, vy = +5, +5  # 爆弾速度ベクトル
     clock = pg.time.Clock()
     tmr = 0
-    bb_img=pg.Surface((20,20))
-    pg.draw.circle(bb_img,(255,0,0),(10,10),10)#爆弾円を描く
-    bb_rct=kk_img.get_rect()
-    bb_rct.center = random.randint(0,WIDTH),random.randint(0,HEIGHT)
-    vx,vy=+5,+5
-    bb_img.set_colorkey((0,0,0))#周りの黒を消す
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -37,15 +53,22 @@ def main():
 
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
-        for key,tpl in DELTA.items():
-            if key_lst[key]:
+        for key, tpl in DELTA.items():
+            if key_lst[key] == True:
                 sum_mv[0] += tpl[0]
                 sum_mv[1] += tpl[1]
-
-        bb_rct.move_ip(vx,vy)
         kk_rct.move_ip(sum_mv)
-        screen.blit(bb_img,bb_rct)
+        # こうかとんが画面外なら，元の場所に戻す
+        if check_bound(kk_rct) != (True, True):
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
+        bb_rct.move_ip(vx, vy)  # 爆弾動く
+        yoko, tate = check_bound(bb_rct)
+        if not yoko:  # 横にはみ出てる
+            vx *= -1
+        if not tate:  # 縦にはみ出てる
+            vy *= -1
+        screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
         clock.tick(50)
