@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 import pygame as pg
 
@@ -22,6 +23,12 @@ def main():
     kk_rct.center = 300, 200
     clock = pg.time.Clock()
     tmr = 0
+    bb_img=pg.Surface((20,20))
+    pg.draw.circle(bb_img,(255,0,0),(10,10),10)#爆弾円を描く
+    bb_rct=kk_img.get_rect()
+    bb_rct.center = random.randint(0,WIDTH),random.randint(0,HEIGHT)
+    vx,vy=+5,+5
+    bb_img.set_colorkey((0,0,0))#周りの黒を消す
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -35,8 +42,9 @@ def main():
                 sum_mv[0] += tpl[0]
                 sum_mv[1] += tpl[1]
 
-        
+        bb_rct.move_ip(vx,vy)
         kk_rct.move_ip(sum_mv)
+        screen.blit(bb_img,bb_rct)
         screen.blit(kk_img, kk_rct)
         pg.display.update()
         tmr += 1
