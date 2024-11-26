@@ -1,7 +1,7 @@
 import os
 import random
 import sys
-
+import time
 import pygame as pg
 
 
@@ -35,6 +35,7 @@ def game_over(screen:pg.Surface) ->None:
     #画面を黒く塗る
     black_img = pg.display.set_mode((WIDTH, HEIGHT))
     black_img.fill((0,0,0))  
+    screen.blit(black_img,(0,0))
     #泣いている工科トン
     kk_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9)
     kk_rct_left = kk_img.get_rect()
@@ -49,9 +50,22 @@ def game_over(screen:pg.Surface) ->None:
     text_rect = txt.get_rect(center=(WIDTH // 2, HEIGHT // 2))
     screen.blit(txt, text_rect)
     pg.display.update()
-    pg.time.sleep(5)
+    time.sleep(5)
 
-    
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    拡大する爆弾のSurfaceリストと加速度リストを作成する関数
+    戻り値：爆弾リスト、加速度リスト
+    """    
+    bb_imgs=[]
+    bb_acc=[]
+    for r in range(1,11):
+        bb_img=pg.Surface((20 * r, 20 * r),pg.SRCALPHA)
+        pg.draw.circle(bb_img, (255, 0, 0), (10 * r, 10 * r), 10 * r)
+        bb_imgs.append(bb_img)
+        bb_acc.append(r)
+    return bb_imgs, bb_acc
+
 
 
 def main():
@@ -70,7 +84,13 @@ def main():
     vx, vy = +5, +5  # 爆弾速度ベクトル
     clock = pg.time.Clock()
     tmr = 0
+    bb_imgs, bb_acc=init_bb_imgs()
     while True:
+        index = min(tmr // 500, 9)
+        bb_img =bb_imgs[index]
+        avx = vx * bb_acc[index]
+        avy = vy * bb_acc[index]
+        bb_rct.move_ip(avx, avy)
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
