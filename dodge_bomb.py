@@ -65,6 +65,19 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
         bb_imgs.append(bb_img)
         bb_acc.append(r)
     return bb_imgs, bb_acc
+def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
+    """
+    移動した方向によって工科トンの画像をゲットする関数
+    引数：sum_mvは合計の移動量タプル
+    戻り値:対応している工科トンのSurface
+    """
+    kk_imgs = {
+        (0, -5): pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9),
+        (0, 5): pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9),
+        (-5, 0): pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9),
+        (5, 0): pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    }
+    return kk_imgs.get(sum_mv, pg.image.load("fig/3.png"))
 
 
 
@@ -85,6 +98,7 @@ def main():
     clock = pg.time.Clock()
     tmr = 0
     bb_imgs, bb_acc=init_bb_imgs()#初期化する
+    sum_mv = [0, 0]
     while True:
         #爆弾のサイズと速度を時間経過によってかわる
         index = min(tmr // 500, 9)#ｔｍｒが500ごとに変化する
@@ -106,6 +120,7 @@ def main():
             if key_lst[key] == True:
                 sum_mv[0] += tpl[0]
                 sum_mv[1] += tpl[1]
+        kk_img = get_kk_img(tuple(sum_mv))
         kk_rct.move_ip(sum_mv)
         # こうかとんが画面外なら，元の場所に戻す
         if check_bound(kk_rct) != (True, True):
